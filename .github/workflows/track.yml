@@ -1,0 +1,25 @@
+name: Track fares
+on:
+  schedule: [{ cron: "0 6,18 * * *" }]   # twice a day (UTC)
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node scripts/track.mjs
+        env:
+          IGNAV_API_KEY: ${{ secrets.IGNAV_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      - run: |
+          git config user.name "fare-watch-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/history.json
+          git diff --cached --quiet || (git commit -m "Update fares" && git pull --rebase -q && git push)
