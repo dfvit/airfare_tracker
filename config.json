@@ -1,15 +1,4 @@
 {
   "dropPercent": 5,
-  "routes": [
-    {
-      "id": "sfo-jfk-dec",
-      "origin": "SFO",
-      "destination": "JFK",
-      "departure_date": "2026-12-18",
-      "return_date": "2026-12-27",
-      "maxStops": 1,
-      "airlines": ["DL", "UA"],
-      "target": 300
-    }
-  ]
+  "routes": []
 }
