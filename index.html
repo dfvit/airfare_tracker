@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fare Watch</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#14213d;--mute:#5d6b82;--line:#d5dde8;--acc:#1f5fbf;--down:#0e8a5f;--up:#c2412d;--soft:#e4ecf7}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1624;--card:#17213a;--ink:#e8eef9;--mute:#93a3bf;--line:#2a3857;--acc:#6aa2ff;--down:#3ccf94;--up:#ff8168;--soft:#1f2c4a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}h1{margin:0;font-size:28px}h2{font-size:17px;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}
+.meta{color:var(--mute);font-size:13px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--soft);border-radius:8px;padding:8px}.stat small{display:block;color:var(--mute);font-size:12px}.stat b{font-size:17px}
+.v{font-weight:600;padding:8px 10px;border-radius:8px;margin-bottom:8px;background:var(--soft);color:var(--mute)}
+.good{background:color-mix(in srgb,var(--down) 18%,transparent);color:var(--down)}.bad{background:color-mix(in srgb,var(--up) 18%,transparent);color:var(--up)}
+svg{width:100%;height:auto;display:block}.alert{border-left:4px solid var(--down);background:var(--soft);padding:6px 10px;margin-bottom:6px;border-radius:0 8px 8px 0;font-size:14px}
+input,select,textarea{width:100%;padding:8px;margin-top:3px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+label{font-size:13px;color:var(--mute)}.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f{grid-column:1/-1}
+button,a.btn{font:inherit;font-weight:600;border:0;border-radius:8px;padding:9px 14px;background:var(--acc);color:#fff;cursor:pointer;text-decoration:none;display:inline-block}
+</style></head><body><main>
+<h1>Fare Watch</h1><p class="meta" id="upd">Loading…</p>
+<div id="alerts"></div><div id="routes"></div>
+<section class="card"><h2>Add a route</h2>
+<div class="g">
+<label>From<input id="o" maxlength="3" placeholder="SFO"></label><label>To<input id="d" maxlength="3" placeholder="JFK"></label>
+<label>Depart<input id="dep" type="date"></label><label>Return (optional)<input id="ret" type="date"></label>
+<label>Max stops<select id="ms"><option value="">Any</option><option value="0">Nonstop</option><option value="1">1</option><option value="2">2</option></select></label>
+<label>Airline codes<input id="al" placeholder="DL, UA"></label>
+<label class="f">Target price ($, optional)<input id="tg" type="number"></label>
+<div class="f"><button id="gen">Add route</button> <button id="run" style="background:var(--soft);color:var(--ink)">Check prices now</button></div>
+<p class="meta f" id="msg" role="status"></p></div></section>
+<section class="card"><h2>GitHub connection</h2><p class="meta">Needed to save routes. Create a fine-grained token limited to this repo with Contents: read and write (add Actions: read and write for "Check prices now"). It stays in this browser only.</p>
+<div class="g"><label>Repository (owner/name)<input id="repo"></label><label>Token<input id="tok" type="password" autocomplete="off" placeholder="github_pat_…"></label></div><p><button id="sv">Save connection</button></p></section>
+</main><script>
+const $=i=>document.getElementById(i),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),$$=n=>"$"+Math.round(n).toLocaleString();
+function chart(h){if(h.length<2)return'<p class="meta">Trend appears after the second check.</p>';
+const W=320,H=110,P=6,ps=h.map(x=>x.p),mn=Math.min(...ps),mx=Math.max(...ps),sp=(mx-mn)||1,t=h.map(x=>+new Date(x.t)),t0=t[0],tr=(t.at(-1)-t0)||1,
+X=v=>P+(v-t0)/tr*(W-2*P),Y=v=>H-P-(v-mn)/sp*(H-2*P),avg=ps.reduce((a,b)=>a+b)/ps.length;
+return`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Price history"><line x1="0" x2="${W}" y1="${Y(avg)}" y2="${Y(avg)}" stroke="var(--mute)" stroke-dasharray="4 4"/><polyline fill="none" stroke="var(--acc)" stroke-width="2" points="${h.map((x,i)=>X(t[i]).toFixed(1)+","+Y(x.p).toFixed(1)).join(" ")}"/><circle cx="${X(t.at(-1))}" cy="${Y(ps.at(-1))}" r="4" fill="var(--acc)"/></svg><div class="meta">Dashed line: average ${$$(avg)} · since ${new Date(t0).toLocaleDateString()}</div>`}
+function card(r,h){const pref=(r.maxStops==null?"Any stops":r.maxStops==0?"Nonstop":"Up to "+r.maxStops+" stop(s)")+" · "+(r.airlines?.length?r.airlines.join(", "):"Any airline");
+let b='<p class="meta">Waiting for the first scheduled check.</p>';
+if(h.length){const ps=h.map(x=>x.p),cur=ps.at(-1),prev=ps.at(-2),avg=ps.reduce((a,c)=>a+c)/ps.length,lo=Math.min(...ps),hi=Math.max(...ps),vs=(cur-avg)/avg*100;
+let c="",m="Log at least 3 checks to compare against history.";
+if(ps.length>=3){if(cur<=lo*1.02){c="good";m="At or near the lowest price tracked. Good time to buy."}else if(vs<=-5){c="good";m=Math.abs(vs).toFixed(0)+"% below average. Good time to buy."}else if(vs>=5){c="bad";m=vs.toFixed(0)+"% above average. Consider waiting."}else m="Close to the average price."}
+const d=prev!=null?cur-prev:0;
+b=`<div class="stats"><div class="stat"><small>Current</small><b>${$$(cur)}</b>${prev!=null?`<small style="color:${d<0?"var(--down)":d>0?"var(--up)":"var(--mute)"}">${d<0?"▼":d>0?"▲":"–"} ${$$(Math.abs(d))}</small>`:""}</div><div class="stat"><small>Average</small><b>${$$(avg)}</b></div><div class="stat"><small>Lowest</small><b>${$$(lo)}</b></div><div class="stat"><small>Highest</small><b>${$$(hi)}</b></div></div><div class="v ${c}">${m}</div>${chart(h)}<p class="meta">Latest: ${esc(h.at(-1).air||"n/a")}, ${h.at(-1).stops} stop(s), checked ${new Date(h.at(-1).t).toLocaleString()}</p>`}
+return`<section class="card"><div style="display:flex;justify-content:space-between"><b style="font-size:20px">${esc(r.origin)} → ${esc(r.destination)}</b><button data-rm="${esc(r.id)}" style="background:none;color:var(--mute);padding:4px 8px">Remove</button></div><div class="meta">${esc(r.departure_date)}${r.return_date?" – "+esc(r.return_date):" · one way"} · ${esc(pref)}${r.target?" · target "+$$(r.target):""}</div>${b}</section>`}
+let CFG={routes:[]},DB={routes:{},alerts:[]};
+const ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k)||"":localStorage.setItem(k,v)}catch(e){return""}},say=t=>$("msg").textContent=t;
+let REPO=ls("fw.repo");
+{const m=location.hostname.match(/^(.+)\.github\.io$/),p=location.pathname.split("/")[1];if(m&&!REPO)REPO=m[1]+"/"+(p&&p!=="index.html"?p:m[1]+".github.io")}
+const api=(path,o={})=>{if(!ls("fw.token"))throw new Error("Add your GitHub token in the connection card first.");return fetch("https://api.github.com/repos/"+REPO+path,{...o,headers:{Authorization:"Bearer "+ls("fw.token"),Accept:"application/vnd.github+json","Content-Type":"application/json"}})};
+async function saveConfig(mutate){
+const r=await api("/contents/config.json");if(!r.ok)throw new Error("Couldn't read config.json ("+r.status+"). Check the repo name and token.");
+const j=await r.json(),c=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));mutate(c);
+const w=await api("/contents/config.json",{method:"PUT",body:JSON.stringify({message:"Update routes from dashboard",content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)+"\n"))),sha:j.sha})});
+if(!w.ok)throw new Error("Couldn't save ("+w.status+"). The token needs Contents: read and write.");return c}
+function render(){
+$("routes").innerHTML=CFG.routes.length?CFG.routes.map(r=>card(r,DB.routes[r.id]||[])).join(""):'<p class="meta">No routes yet. Add one below.</p>';
+$("alerts").innerHTML=DB.alerts.length?'<section class="card"><h2>Recent alerts</h2>'+DB.alerts.slice(0,6).map(a=>`<div class="alert">${esc(a.msg)} <span class="meta">${new Date(a.t).toLocaleString()}</span></div>`).join("")+"</section>":"";
+const all=Object.values(DB.routes).flat().map(x=>x.t).sort();$("upd").textContent=all.length?"Last check: "+new Date(all.at(-1)).toLocaleString():"No checks yet."}
+async function init(){try{[CFG,DB]=await Promise.all([fetch("config.json").then(r=>r.json()),fetch("data/history.json").then(r=>r.json())]);render()}catch(e){$("upd").textContent="Couldn't load data. Open this from GitHub Pages, not as a local file."}}
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-rm]");if(!b||!confirm("Remove this route and its alerts?"))return;
+try{say("Saving…");CFG=await saveConfig(c=>{c.routes=c.routes.filter(r=>r.id!==b.dataset.rm)});render();say("Route removed.")}catch(x){say(x.message)}});
+$("gen").onclick=async()=>{const o={origin:$("o").value.trim().toUpperCase(),destination:$("d").value.trim().toUpperCase(),departure_date:$("dep").value},td=new Date().toISOString().slice(0,10);
+if(!/^[A-Z]{3}$/.test(o.origin)||!/^[A-Z]{3}$/.test(o.destination))return say("Enter 3-letter airport codes for both cities.");
+if(!o.departure_date||o.departure_date<td)return say("Pick a departure date that isn't in the past.");
+if($("ret").value){if($("ret").value<o.departure_date)return say("Return date must be after departure.");o.return_date=$("ret").value}
+if($("ms").value!=="")o.maxStops=+$("ms").value;const a=$("al").value.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean);if(a.length)o.airlines=a;if($("tg").value)o.target=+$("tg").value;
+o.id=(o.origin+"-"+o.destination+"-"+o.departure_date).toLowerCase();
+try{say("Saving to GitHub…");CFG=await saveConfig(c=>{if(c.routes.some(r=>r.id===o.id))o.id+="-"+Date.now()%1000;c.routes.push(o)});render();say("Saved. Tap “Check prices now” to fetch its first price.");["o","d","dep","ret","al","tg"].forEach(i=>$(i).value="")}catch(x){say(x.message)}};
+$("run").onclick=async()=>{try{const r=await api("/actions/workflows/track.yml/dispatches",{method:"POST",body:JSON.stringify({ref:"main"})});say(r.status===204?"Check started. Reload in a minute or two.":"Couldn't start the check ("+r.status+"). The token needs Actions: read and write.")}catch(x){say(x.message)}};
+$("sv").onclick=()=>{ls("fw.repo",$("repo").value.trim());if($("tok").value)ls("fw.token",$("tok").value.trim());$("tok").value="";REPO=ls("fw.repo")||REPO;say("Connection saved in this browser.")};
+$("repo").value=REPO;init();
+</script></body></html>
