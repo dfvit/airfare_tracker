@@ -10,3 +10,5 @@ GitHub Actions checks fares twice a day, commits prices to `data/history.json`, 
 6. Actions tab > "Track fares" > Run workflow to test.
 
 Add and remove routes from the dashboard (it commits to `config.json`). Each route costs 1 request per run (about 60 per month at twice daily).
+
+https://dfvit.github.io/airfare_tracker/
