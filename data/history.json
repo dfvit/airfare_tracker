@@ -91,10 +91,25 @@
     "cur": "USD",
     "air": "Aeromexico",
     "stops": 1
+   },
+   {
+    "t": "2026-10-14T11:18:06.711Z",
+    "p": 890,
+    "cur": "USD",
+    "air": "Aeromexico",
+    "stops": 1
    }
   ]
  },
  "alerts": [
+  {
+   "t": "2026-10-14T11:18:06.722Z",
+   "msg": "SEA → UIO hit a new low: $890."
+  },
+  {
+   "t": "2026-10-14T11:18:06.722Z",
+   "msg": "SEA → UIO dropped to $890 (was $961)."
+  },
   {
    "t": "2026-10-13T13:39:16.796Z",
    "msg": "SEA → UIO hit a new low: $936."
