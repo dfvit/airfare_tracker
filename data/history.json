@@ -217,6 +217,13 @@
     "cur": "USD",
     "air": "United",
     "stops": 1
+   },
+   {
+    "t": "2026-10-23T11:05:16.533Z",
+    "p": 1028,
+    "cur": "USD",
+    "air": "United",
+    "stops": 1
    }
   ]
  },
