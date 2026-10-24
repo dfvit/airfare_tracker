@@ -231,6 +231,13 @@
     "cur": "USD",
     "air": "Aeromexico",
     "stops": 1
+   },
+   {
+    "t": "2026-10-24T10:21:41.023Z",
+    "p": 1008,
+    "cur": "USD",
+    "air": "American",
+    "stops": 1
    }
   ]
  },
