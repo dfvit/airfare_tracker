@@ -259,6 +259,13 @@
     "cur": "USD",
     "air": "American",
     "stops": 1
+   },
+   {
+    "t": "2026-10-26T12:19:58.634Z",
+    "p": 1035,
+    "cur": "USD",
+    "air": "Delta",
+    "stops": 1
    }
   ]
  },
