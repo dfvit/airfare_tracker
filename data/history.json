@@ -287,6 +287,13 @@
     "cur": "USD",
     "air": "United",
     "stops": 1
+   },
+   {
+    "t": "2026-10-28T12:11:33.969Z",
+    "p": 1075,
+    "cur": "USD",
+    "air": "Delta",
+    "stops": 1
    }
   ]
  },
