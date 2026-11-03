@@ -364,6 +364,13 @@
     "cur": "USD",
     "air": "United",
     "stops": 1
+   },
+   {
+    "t": "2026-11-03T00:34:28.580Z",
+    "p": 1008,
+    "cur": "USD",
+    "air": "American",
+    "stops": 1
    }
   ]
  },
