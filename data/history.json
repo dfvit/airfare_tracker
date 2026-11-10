@@ -448,6 +448,13 @@
     "cur": "USD",
     "air": "Avianca",
     "stops": 1
+   },
+   {
+    "t": "2026-11-10T01:13:14.448Z",
+    "p": 1028,
+    "cur": "USD",
+    "air": "American",
+    "stops": 1
    }
   ]
  },
