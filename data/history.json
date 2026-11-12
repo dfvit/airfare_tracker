@@ -469,10 +469,21 @@
     "cur": "USD",
     "air": "United",
     "stops": 1
+   },
+   {
+    "t": "2026-11-12T23:14:55.801Z",
+    "p": 991,
+    "cur": "USD",
+    "air": "American",
+    "stops": 1
    }
   ]
  },
  "alerts": [
+  {
+   "t": "2026-11-12T23:14:55.814Z",
+   "msg": "SEA → UIO dropped to $991 (was $1,068)."
+  },
   {
    "t": "2026-10-28T22:14:33.152Z",
    "msg": "SEA → UIO dropped to $1,008 (was $1,075)."
