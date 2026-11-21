@@ -574,6 +574,13 @@
     "cur": "USD",
     "air": "Avianca",
     "stops": 1
+   },
+   {
+    "t": "2026-11-21T22:48:43.759Z",
+    "p": 1043,
+    "cur": "USD",
+    "air": "Alaska",
+    "stops": 1
    }
   ]
  },
