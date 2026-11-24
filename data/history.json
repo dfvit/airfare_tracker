@@ -602,6 +602,13 @@
     "cur": "USD",
     "air": "American",
     "stops": 1
+   },
+   {
+    "t": "2026-11-24T17:00:34.771Z",
+    "p": 1026,
+    "cur": "USD",
+    "air": "United",
+    "stops": 1
    }
   ]
  },
