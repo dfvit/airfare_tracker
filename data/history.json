@@ -630,6 +630,13 @@
     "cur": "USD",
     "air": "American",
     "stops": 1
+   },
+   {
+    "t": "2026-11-26T16:28:17.296Z",
+    "p": 991,
+    "cur": "USD",
+    "air": "American",
+    "stops": 1
    }
   ]
  },
